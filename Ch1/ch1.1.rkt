@@ -159,4 +159,33 @@
   (cond ((<= x 0) 0)
          ((= 0 (edge x)) 1)
         (else (+ (pascal (coord-to-int (- (row x) 1) (- (pos x) 1))) (pascal (coord-to-int (- (row x) 1) (pos x)))))))
-;        (+ (pascal (coord-to-int (- (row x) 1) (- (pos x) 1))) (pascal (coord-to-int (- (row x) 1) (pos x))))))
+
+(define (identity x) (+ 0 x))
+(define (incr x) 
+    (+ x 1))
+(define (accumulate combiner null-value term a next b)
+  (if (> a b)
+      null-value
+      (accumulate combiner (combiner null-value (term a)) term (next a) next b))) 
+(define (sum a b)
+  (accumulate + 0 identity a incr b))
+(define (product-sum a b)
+  (accumulate * 1 identity a incr b)) 
+
+(define (accumulate-filter combiner filter null-value modifier a next b)
+  (if (> a b)
+      null-value
+      (accumulate-filter combiner filter (combiner null-value (modifier (filter a))) modifier (next a) next b)))
+
+(define (sum-square-prime a b)
+  (define (prime-filter a)
+    (if (= 1 (prime? 2 a))
+        1
+        0))
+  (define (prime? test a)
+    (cond ((= a 1) 1)
+          ((= test a) 1)
+          ((= (remainder a test) 0) 0)
+          (else (prime? (+ 1 test) a))))
+  (accumulate-filter + prime-filter 0 square a incr b))
+  
